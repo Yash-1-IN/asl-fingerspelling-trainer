@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ASL Fingerspelling Trainer</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <main>
+    <h1>ASL Fingerspelling Trainer</h1>
+    <p id="status" role="status">Waiting for camera permission&hellip;</p>
+    <div class="camera-wrap">
+      <video id="camera-feed" autoplay playsinline muted></video>
+      <canvas id="landmarks-overlay"></canvas>
+    </div>
+    <p><a href="record.html">Developer: record samples</a></p>
+  </main>
+
+  <script type="module">
+    import { startCamera } from './js/camera.js';
+    import { startTracking } from './js/landmarks.js';
+
+    const status = document.getElementById('status');
+    try {
+      await startCamera(document.getElementById('camera-feed'));
+      status.textContent = 'Camera on. Loading hand tracking…';
+      await startTracking(
+        document.getElementById('camera-feed'),
+        document.getElementById('landmarks-overlay'),
+        () => {}
+      );
+      status.textContent = 'Hand tracking ready. Show your hand to the camera.';
+    } catch (error) {
+      status.textContent = `Could not start: ${error.name}: ${error.message}`;
+      console.error(error);
+    }
+  </script>
+</body>
+</html>

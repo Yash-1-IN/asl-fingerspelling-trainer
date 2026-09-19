@@ -1,0 +1,3 @@
+# Recorded datasets stay private until contributors agree to publish them.
+# Remove this line when you want to commit dataset.json.
+data/asl-dataset-*.json

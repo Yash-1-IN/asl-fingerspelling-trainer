@@ -1,0 +1,172 @@
+/* Phase 1: bare-bones layout, just enough to see the video clearly.
+   Real visual design comes in a later phase, after a design plan is approved. */
+
+body {
+  font-family: system-ui, sans-serif;
+  background: #111;
+  color: #eee;
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+main {
+  text-align: center;
+  padding: 2rem;
+}
+
+a {
+  color: #93c5fd;
+}
+
+.camera-wrap {
+  position: relative;
+  width: 640px;
+  max-width: 90vw;
+  margin: 0 auto;
+}
+
+.camera-wrap video,
+.camera-wrap canvas {
+  display: block;
+  width: 100%;
+  border-radius: 8px;
+  transform: scaleX(-1); /* mirror, so moving your hand right looks right on screen */
+}
+
+.camera-wrap video {
+  background: #000;
+}
+
+.camera-wrap canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+/* Visible keyboard focus everywhere */
+:focus-visible {
+  outline: 3px solid #facc15;
+  outline-offset: 2px;
+}
+
+/* ---- Record page (functional layout only; real design comes later) ---- */
+
+body.record-page {
+  display: block;
+  padding: 1rem 2rem 3rem;
+}
+
+.page-header {
+  display: flex;
+  align-items: baseline;
+  gap: 1.5rem;
+}
+
+.record-layout {
+  display: grid;
+  grid-template-columns: minmax(320px, 640px) minmax(320px, 1fr);
+  gap: 2rem;
+  padding: 0;
+  text-align: left;
+}
+
+.overlay-message {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+  font-weight: 700;
+  text-shadow: 0 2px 8px #000;
+  pointer-events: none;
+}
+
+.record-page progress {
+  width: 100%;
+}
+
+.hint {
+  color: #bbb;
+  max-width: 45ch;
+}
+
+button,
+.file-button {
+  font: inherit;
+  color: #eee;
+  background: #2a2a2a;
+  border: 2px solid #777;
+  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.file-button input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.file-button:focus-within {
+  outline: 3px solid #facc15;
+  outline-offset: 2px;
+}
+
+.letter-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.5rem;
+  max-width: 480px;
+}
+
+.letter-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.4rem 0;
+}
+
+.letter-btn .letter {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.letter-btn .count {
+  font-size: 0.75rem;
+}
+
+/* Low-sample letters use a dashed border, so it isn't colour alone */
+.letter-btn.low {
+  border-style: dashed;
+}
+
+.letter-btn[aria-pressed="true"] {
+  background: #eee;
+  color: #111;
+  border-color: #eee;
+}
+
+.session-list {
+  padding-left: 1.2rem;
+}
+
+.session-list li {
+  margin-bottom: 0.4rem;
+}
+
+@media (max-width: 900px) {
+  .record-layout {
+    grid-template-columns: 1fr;
+  }
+}
