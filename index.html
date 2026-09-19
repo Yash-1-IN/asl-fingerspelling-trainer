@@ -9,32 +9,38 @@
 <body>
   <main>
     <h1>ASL Fingerspelling Trainer</h1>
-    <p id="status" role="status">Waiting for camera permission&hellip;</p>
+    <p id="status" role="status">Starting&hellip;</p>
+
     <div class="camera-wrap">
       <video id="camera-feed" autoplay playsinline muted></video>
       <canvas id="landmarks-overlay"></canvas>
     </div>
-    <p><a href="record.html">Developer: record samples</a></p>
+
+    <section class="live-readout" aria-label="Recognised letter">
+      <p id="held-big" class="held-big" aria-hidden="true">–</p>
+      <p id="held-text" role="status">Held: none yet</p>
+      <p id="now-text">Right now: no hand in view</p>
+      <p>
+        <label for="confidence-meter">Confidence</label>
+        <progress id="confidence-meter" max="1" value="0"></progress>
+        <span id="confidence-text">0%</span>
+      </p>
+      <p id="model-source" class="hint"></p>
+    </section>
+
+    <details class="tuning">
+      <summary>Tuning</summary>
+      <p class="hint">A letter counts as held when enough of the last few frames agree and are confident.</p>
+      <p><label>Frames remembered <input id="tune-window" type="number" min="1" max="60" step="1"></label></p>
+      <p><label>Frames that must agree <input id="tune-agree" type="number" min="1" max="60" step="1"></label></p>
+      <p><label>Minimum confidence (0 to 1) <input id="tune-confidence" type="number" min="0" max="1" step="0.01"></label></p>
+    </details>
+
+    <p class="fine-print">This teaches fingerspelling only, not ASL. Your camera feed stays on your device. Nothing is uploaded, nothing is stored on a server, and there is no account.</p>
+    <p><a href="record.html">Developer: record samples</a> &middot; <a href="train.html">Train model</a></p>
   </main>
 
-  <script type="module">
-    import { startCamera } from './js/camera.js';
-    import { startTracking } from './js/landmarks.js';
-
-    const status = document.getElementById('status');
-    try {
-      await startCamera(document.getElementById('camera-feed'));
-      status.textContent = 'Camera on. Loading hand tracking…';
-      await startTracking(
-        document.getElementById('camera-feed'),
-        document.getElementById('landmarks-overlay'),
-        () => {}
-      );
-      status.textContent = 'Hand tracking ready. Show your hand to the camera.';
-    } catch (error) {
-      status.textContent = `Could not start: ${error.name}: ${error.message}`;
-      console.error(error);
-    }
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+  <script type="module" src="js/ui-live.js"></script>
 </body>
 </html>

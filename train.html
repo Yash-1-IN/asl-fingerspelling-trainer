@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Train model – ASL Fingerspelling Trainer</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="record-page">
+  <header class="page-header">
+    <h1>Train model</h1>
+    <a href="index.html">Back to camera</a>
+    <a href="record.html">Record samples</a>
+  </header>
+
+  <main class="train-layout">
+    <p id="status" role="status">Loading your samples&hellip;</p>
+
+    <section aria-labelledby="h-data">
+      <h2 id="h-data">1. Your dataset</h2>
+      <p id="dataset-summary"></p>
+      <p id="clean-report" class="hint"></p>
+      <ul id="letter-counts" class="letter-counts"></ul>
+      <p id="dataset-warning"></p>
+    </section>
+
+    <section aria-labelledby="h-split">
+      <h2 id="h-split">2. Choose test sessions</h2>
+      <p class="hint">The model never trains on the ticked sessions. It is scored on them instead, which gives an honest accuracy. A session recorded by a different person, in a different room, makes the hardest and most honest test.</p>
+      <ul id="session-choices" class="session-list"></ul>
+    </section>
+
+    <section aria-labelledby="h-train">
+      <h2 id="h-train">3. Train</h2>
+      <p>
+        <button id="train-btn" type="button" disabled>Train and test</button>
+        <button id="final-btn" type="button" disabled>Retrain on all data</button>
+      </p>
+      <progress id="train-progress" max="80" value="0" aria-label="Training progress"></progress>
+      <p id="epoch-text">Not started.</p>
+      <p id="result-text"></p>
+    </section>
+
+    <section aria-labelledby="h-matrix">
+      <h2 id="h-matrix">4. Where it gets confused</h2>
+      <p class="hint">Each row is the letter that was really signed. Each column is what the model guessed. Numbers on the diagonal are correct guesses; numbers off it are mistakes. Darker cells mean a bigger share of that row.</p>
+      <ul id="top-confusions"></ul>
+      <div class="matrix-wrap"><table id="matrix" class="matrix"></table></div>
+    </section>
+
+    <section aria-labelledby="h-save">
+      <h2 id="h-save">5. Save</h2>
+      <p class="hint">Use "Retrain on all data" first if you want the final model to learn from the test sessions too. Its accuracy can't be measured, so quote the number from "Train and test".</p>
+      <p>
+        <button id="save-btn" type="button" disabled>Save in this browser</button>
+        <button id="export-btn" type="button" disabled>Download model files</button>
+      </p>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+  <script type="module" src="js/ui-train.js"></script>
+</body>
+</html>

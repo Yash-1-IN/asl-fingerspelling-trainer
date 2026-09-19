@@ -165,6 +165,71 @@ button:disabled {
   margin-bottom: 0.4rem;
 }
 
+.live-readout {
+  margin-top: 0.5rem;
+}
+
+.held-big {
+  font-size: 5rem;
+  font-weight: 700;
+  line-height: 1;
+  margin: 0.5rem 0;
+}
+
+.tuning {
+  max-width: 420px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.tuning input {
+  width: 5rem;
+  font: inherit;
+}
+
+.fine-print {
+  color: #bbb;
+  font-size: 0.85rem;
+  max-width: 60ch;
+  margin: 1rem auto;
+}
+
+.train-layout {
+  max-width: 1100px;
+  text-align: left;
+  padding: 0;
+}
+
+.letter-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  list-style: none;
+  padding: 0;
+}
+
+.matrix-wrap {
+  overflow-x: auto;
+}
+
+.matrix {
+  border-collapse: collapse;
+  font-size: 0.7rem;
+}
+
+.matrix th,
+.matrix td {
+  min-width: 1.7rem;
+  height: 1.7rem;
+  text-align: center;
+  border: 1px solid #333;
+}
+
+.matrix td.diagonal {
+  outline: 1px solid #777;
+  outline-offset: -2px;
+}
+
 @media (max-width: 900px) {
   .record-layout {
     grid-template-columns: 1fr;
