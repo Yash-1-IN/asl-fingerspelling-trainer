@@ -536,6 +536,18 @@ label input[type="number"] {
   color: var(--ink);
 }
 
+.slider-row {
+  display: grid;
+  gap: 0.4rem;
+  max-width: 24rem;
+  margin-bottom: 0.4rem;
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: var(--ice);
+}
+
 .session-list {
   padding-left: 1.1rem;
 }

@@ -3,7 +3,7 @@
 import { startCamera } from './camera.js';
 import { startTracking } from './landmarks.js';
 import { CLASSES, NO_SIGN, labelOf } from './letters.js';
-import { TARGET_SAMPLES, newSessionId, createRecorder } from './capture.js';
+import { TARGET_SAMPLES, CAPTURE_INTERVAL_MS, newSessionId, createRecorder } from './capture.js';
 import * as storage from './storage.js';
 
 const LOW_SAMPLE_THRESHOLD = 150; // letters below this get a "low" marker
@@ -29,7 +29,24 @@ let selectedLetter = null;
 let counts = {};
 let handVisible = null;
 
-progressEl.max = TARGET_SAMPLES;
+const slider = $('target-slider');
+let targetFrames = TARGET_SAMPLES;
+
+function applyTarget(value) {
+  targetFrames = Number(value);
+  slider.value = String(targetFrames);
+  $('target-output').textContent = String(targetFrames);
+  $('target-hint').textContent =
+    `About ${Math.round(targetFrames * CAPTURE_INTERVAL_MS / 1000)} seconds. ` +
+    'Longer takes only help if you keep changing angle, distance and position.';
+  progressEl.max = targetFrames;
+  showProgress(0);
+}
+
+slider.addEventListener('input', () => {
+  applyTarget(slider.value);
+  try { localStorage.setItem('aslTargetFrames', slider.value); } catch { /* not critical */ }
+});
 
 const recorder = createRecorder({
   sessionId: SESSION_ID,
@@ -59,6 +76,7 @@ function updateControls() {
   cancelBtn.hidden = !busy;
   deleteLetterBtn.disabled = busy || !selectedLetter || !counts[selectedLetter];
   for (const btn of gridEl.children) btn.disabled = busy;
+  slider.disabled = busy;
 }
 
 function renderGrid() {
@@ -142,12 +160,12 @@ function selectLetter(letter) {
 
 function showProgress(count = 0) {
   progressEl.value = count;
-  progressTextEl.textContent = `${count} / ${TARGET_SAMPLES} frames`;
+  progressTextEl.textContent = `${count} / ${targetFrames} frames`;
 }
 
 function startRecording() {
   showProgress(0);
-  recorder.start(selectedLetter);
+  recorder.start(selectedLetter, targetFrames);
   updateControls();
 }
 
@@ -169,7 +187,7 @@ async function finishRecording(frames, letter) {
   }
   await storage.addSamples(frames);
   await refresh();
-  const short = frames.length < TARGET_SAMPLES * 0.5;
+  const short = frames.length < targetFrames * 0.5;
   setStatus(
     `Saved ${frames.length} samples for ${labelOf(letter)}.` +
     (short ? ' That is fewer than expected because the hand kept dropping out. Consider re-recording.' : '')
@@ -240,6 +258,10 @@ $('import-input').addEventListener('change', async (event) => {
 
 async function init() {
   renderGrid();
+  try {
+    const saved = Number(localStorage.getItem('aslTargetFrames'));
+    if (saved >= 50 && saved <= 500) applyTarget(saved);
+  } catch { /* not critical */ }
   try {
     await navigator.storage?.persist?.();
   } catch { /* not critical */ }

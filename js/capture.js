@@ -1,10 +1,12 @@
 // The recording rules, shared by the Record screen and the Contribute page so
 // the two can never drift apart: countdown, then one frame every 100 ms.
 
-export const TARGET_SAMPLES = 100;
+export const TARGET_SAMPLES = 100;    // default frames per recording
 export const CAPTURE_INTERVAL_MS = 100;
-export const MAX_CAPTURE_MS = 20000;
 export const COUNTDOWN_SECONDS = 3;
+
+// A recording gives up after twice the time it should need, if the hand keeps dropping out.
+const maxCaptureMs = (target) => target * CAPTURE_INTERVAL_MS * 2;
 
 // One id per page load. Training uses it to hold out whole sessions.
 export function newSessionId() {
@@ -19,13 +21,16 @@ export function newSessionId() {
 export function createRecorder({ sessionId, onCountdown, onCaptureStart, onProgress, onFinish }) {
   let state = 'idle'; // idle | countdown | capturing
   let cls = null;
+  let target = TARGET_SAMPLES;
   let captured = [];
   let startedAt = 0;
   let lastAt = 0;
   let timer = null;
 
-  function start(className) {
+  // targetFrames: how many frames to capture (defaults to TARGET_SAMPLES).
+  function start(className, targetFrames = TARGET_SAMPLES) {
     cls = className;
+    target = targetFrames;
     captured = [];
     state = 'countdown';
     let remaining = COUNTDOWN_SECONDS;
@@ -73,7 +78,7 @@ export function createRecorder({ sessionId, onCountdown, onCaptureStart, onProgr
       });
       onProgress?.(captured.length);
     }
-    if (captured.length >= TARGET_SAMPLES || now - startedAt > MAX_CAPTURE_MS) finish();
+    if (captured.length >= target || now - startedAt > maxCaptureMs(target)) finish();
   }
 
   return { start, cancel, handleFrame, get state() { return state; } };

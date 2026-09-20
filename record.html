@@ -38,6 +38,11 @@
 
         <h2>2. Record</h2>
         <p id="record-hint" class="hint">Hold the handshape, then slowly turn your hand, and move it closer and farther. Variety makes a better model.</p>
+        <p class="slider-row">
+          <label for="target-slider">Frames per recording: <output id="target-output" class="mono" for="target-slider">100</output></label>
+          <input id="target-slider" name="target-frames" type="range" min="50" max="500" step="50" value="100">
+        </p>
+        <p id="target-hint" class="hint">About 10 seconds. Longer takes only help if you keep changing angle, distance and position.</p>
         <div class="button-row">
           <button id="start-btn" class="primary" type="button" disabled>Start recording</button>
           <button id="cancel-btn" type="button" hidden>Cancel</button>
