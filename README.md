@@ -36,13 +36,13 @@ Honest numbers, measured by holding out **whole recording sessions** the model n
 | Held-out low-light session, a much harder test (24 letters) | about 77% |
 | Held-out session, same person as most training data (25 classes) | about 99% |
 
-Read these as a range, not one number. The high figures come from conditions the model has seen, and the low one from a genuinely new setting. More people and more varied rooms are what improve it.
+These were measured on earlier, smaller versions of the dataset and will be re-measured after each retrain. Read them as a range, not one number. The high figures come from conditions the model has seen, and the low one from a genuinely new setting. More people and more varied rooms are what improve it.
 
 **Known weak spots.** The letters that are variations on a closed fist (A, M, N, S, T) are hard to tell apart from hand landmarks alone, as are U, V and R. This is a real limit of the approach. When the model is unsure it shows both candidates.
 
 ## The dataset
 
-The training data was recorded by me and by friends, across multiple sessions, rooms, lighting conditions and hands. At the time of writing it is about 15,000 frames from 9 sessions. It is kept private for now, because contributors have not agreed to publish it. Each sample is a letter label plus 63 numbers, with a random session code, a timestamp and a hand label. No images or video were ever stored.
+The training data was recorded by me and by friends, across multiple sessions, rooms, lighting conditions and hands. At the time of writing it is about 22,900 frames from 11 sessions, roughly 900 per letter plus 900 "no sign" frames. It is kept private for now, because contributors have not agreed to publish it. Each sample is a letter label plus 63 numbers, with a random session code, a timestamp and a hand label. No images or video were ever stored.
 
 ## Run it yourself
 

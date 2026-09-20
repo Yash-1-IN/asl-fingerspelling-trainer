@@ -49,3 +49,8 @@ One entry per session: what was built, what broke, what fixed it, what was learn
 
 - Record page can now import several JSON files at once (multi-select with Ctrl or Shift). Tested with 3 real files plus a deliberately broken one: 7,377 samples imported, the broken file was named in the status message and did not stop the rest.
 - Added README.md (what it is and is not, how recognition works, honest accuracy range, privacy, running locally, layout, credits). Verified the GitHub Pages site is live. Phase 8 (Learn and Drill) postponed until more data arrives.
+
+## 2026-09-20 (evening)
+
+- Dataset grew to 22,877 unique samples across 11 sessions (~900 per class; "no sign" 900 frames from 3 sessions; 84 frames flagged Left). New files were "Double trouble" (5,100) and the 2026-09-20 ayuhka session (2,500). Import de-duplicates overlapping exports (`asl-dataset-2026-09-20.json` and the older ones were entirely repeats).
+- Installed a newly trained 25-class model into `model/` (28,004 bytes, matched pair saved 17:01) and pushed it. Accuracy for this exact model was not re-measured here; README numbers are from earlier runs and say so.
