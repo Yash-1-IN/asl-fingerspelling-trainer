@@ -4,7 +4,6 @@ A web app that helps you practise **ASL fingerspelling** with your webcam. Make 
 
 **Try it:** https://yash-1-in.github.io/asl-fingerspelling-trainer/
 
-Built as a school project (IB CAS, Service) for my school's ASL club, and for anyone else who opens the link.
 
 ## What this is not
 
