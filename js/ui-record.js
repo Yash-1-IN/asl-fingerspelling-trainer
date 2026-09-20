@@ -212,16 +212,30 @@ $('export-btn').addEventListener('click', async () => {
 });
 
 $('import-input').addEventListener('change', async (event) => {
-  const file = event.target.files[0];
+  const files = [...event.target.files];
   event.target.value = '';
-  if (!file) return;
-  try {
-    const { added, skipped } = await storage.importJson(await file.text());
-    setStatus(`Imported ${added} samples (${skipped} skipped as duplicates or invalid).`);
-    await refresh();
-  } catch (error) {
-    setStatus(`Import failed: ${error.message} Choose a JSON file exported from this app.`);
+  if (files.length === 0) return;
+
+  let added = 0;
+  let skipped = 0;
+  const failed = [];
+  for (const [i, file] of files.entries()) {
+    setStatus(`Importing file ${i + 1} of ${files.length}: ${file.name}…`);
+    try {
+      const result = await storage.importJson(await file.text());
+      added += result.added;
+      skipped += result.skipped;
+    } catch (error) {
+      failed.push(`${file.name} (${error.message})`);
+    }
   }
+
+  await refresh();
+  setStatus(
+    `Imported ${added} samples from ${files.length - failed.length} of ${files.length} files ` +
+    `(${skipped} skipped as duplicates or invalid).` +
+    (failed.length ? ` Could not read: ${failed.join('; ')}. Choose JSON files exported from this app.` : '')
+  );
 });
 
 async function init() {

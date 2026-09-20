@@ -45,10 +45,10 @@
 
         <h2>Your data</h2>
         <p>Total samples: <strong id="total-count" class="mono">0</strong></p>
-        <p class="hint">Samples live in this browser only. Export a backup after every session.</p>
+        <p class="hint">Samples live in this browser only. Export a backup after every session. In the import window, hold Ctrl or Shift to pick several files at once.</p>
         <div class="button-row">
           <button id="export-btn" type="button">Export all as JSON</button>
-          <label class="file-button">Import JSON<input id="import-input" type="file" accept="application/json,.json"></label>
+          <label class="file-button">Import JSON files<input id="import-input" type="file" accept="application/json,.json" multiple></label>
         </div>
         <div class="button-row">
           <button id="delete-letter-btn" type="button" disabled>Delete samples for selected letter</button>
