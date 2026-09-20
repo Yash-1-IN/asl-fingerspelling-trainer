@@ -3,44 +3,64 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0e1114">
   <title>ASL Fingerspelling Trainer</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preload" href="fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-  <main>
-    <h1>ASL Fingerspelling Trainer</h1>
-    <p id="status" role="status">Starting&hellip;</p>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header id="topbar" class="topbar"></header>
 
-    <div class="camera-wrap">
-      <video id="camera-feed" autoplay playsinline muted></video>
-      <canvas id="landmarks-overlay"></canvas>
+  <main id="main" class="page">
+    <div class="page-head">
+      <h1>Sign a letter. See if it holds.</h1>
+      <p id="status" role="status">Starting&hellip;</p>
     </div>
 
-    <section class="live-readout" aria-label="Recognised letter">
-      <p id="held-big" class="held-big" aria-hidden="true">–</p>
-      <p id="held-text" role="status">Held: none yet</p>
-      <p id="now-text">Right now: no hand in view</p>
-      <p>
-        <label for="confidence-meter">Confidence</label>
-        <progress id="confidence-meter" max="1" value="0"></progress>
-        <span id="confidence-text">0%</span>
-      </p>
-      <p id="model-source" class="hint"></p>
-    </section>
+    <div class="two-col">
+      <div class="camera-wrap" id="camera-wrap" data-state="idle">
+        <video id="camera-feed" autoplay playsinline muted></video>
+        <canvas id="landmarks-overlay"></canvas>
+        <div class="brackets" aria-hidden="true"></div>
+      </div>
 
-    <details class="tuning">
-      <summary>Tuning</summary>
-      <p class="hint">A letter counts as held when enough of the last few frames agree and are confident.</p>
-      <p><label>Frames remembered <input id="tune-window" type="number" min="1" max="60" step="1"></label></p>
-      <p><label>Frames that must agree <input id="tune-agree" type="number" min="1" max="60" step="1"></label></p>
-      <p><label>Minimum confidence (0 to 1) <input id="tune-confidence" type="number" min="0" max="1" step="0.01"></label></p>
-    </details>
+      <section class="panel readout" id="readout" data-state="idle" aria-label="Recognised letter">
+        <p id="held-big" class="held-letter" aria-hidden="true"></p>
+        <p class="held-line">
+          <svg id="held-icon" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" hidden><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"/></svg>
+          <span id="held-text" role="status">Held: none yet</span>
+        </p>
+        <p id="now-text" class="now-line">Right now: no hand in view</p>
 
-    <p class="fine-print">This teaches fingerspelling only, not ASL. Your camera feed stays on your device. Nothing is uploaded, nothing is stored on a server, and there is no account.</p>
-    <p><a href="record.html">Developer: record samples</a> &middot; <a href="train.html">Train model</a></p>
+        <div class="meter-row">
+          <label for="confidence-meter">Confidence</label>
+          <progress id="confidence-meter" max="1" value="0"></progress>
+          <span id="confidence-text" class="mono">0%</span>
+        </div>
+
+        <p id="model-source" class="hint"></p>
+
+        <details>
+          <summary>Tuning</summary>
+          <p class="hint">A letter counts as held when enough of the last few frames agree and are confident.</p>
+          <p><label>Frames remembered <input id="tune-window" name="window-size" type="number" min="1" max="60" step="1" autocomplete="off"></label></p>
+          <p><label>Frames that must agree <input id="tune-agree" name="min-agree" type="number" min="1" max="60" step="1" autocomplete="off"></label></p>
+          <p><label>Minimum confidence (0 to 1) <input id="tune-confidence" name="min-confidence" type="number" min="0" max="1" step="0.01" inputmode="decimal" autocomplete="off"></label></p>
+        </details>
+      </section>
+    </div>
   </main>
 
+  <footer class="site-footer">
+    <p>This teaches fingerspelling only. ASL is a full language with its own grammar, and this is one small part of it.</p>
+    <p>Your camera feed stays on your device. Nothing is uploaded, nothing is stored on a server, and there is no account.</p>
+  </footer>
+
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+  <script type="module" src="js/nav.js"></script>
   <script type="module" src="js/ui-live.js"></script>
 </body>
 </html>

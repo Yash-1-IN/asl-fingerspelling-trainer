@@ -18,11 +18,18 @@ const HAND_CONNECTIONS = [
   [0, 17],
 ];
 
+// Colours come from CSS (--skel-line, --skel-dot), so the page decides the look,
+// for example turning the skeleton green while a letter is held.
 function drawSkeleton(ctx, canvas, landmarks) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  ctx.strokeStyle = '#4ade80';
-  ctx.lineWidth = 2;
+  const style = getComputedStyle(canvas);
+  const lineColor = style.getPropertyValue('--skel-line').trim() || '#e8ecef';
+  const dotColor = style.getPropertyValue('--skel-dot').trim() || '#7cc4ff';
+
+  ctx.strokeStyle = lineColor;
+  ctx.lineWidth = 3;
+  ctx.lineCap = 'round';
   for (const [a, b] of HAND_CONNECTIONS) {
     ctx.beginPath();
     ctx.moveTo(landmarks[a].x * canvas.width, landmarks[a].y * canvas.height);
@@ -30,10 +37,10 @@ function drawSkeleton(ctx, canvas, landmarks) {
     ctx.stroke();
   }
 
-  ctx.fillStyle = '#facc15';
+  ctx.fillStyle = dotColor;
   for (const point of landmarks) {
     ctx.beginPath();
-    ctx.arc(point.x * canvas.width, point.y * canvas.height, 4, 0, 2 * Math.PI);
+    ctx.arc(point.x * canvas.width, point.y * canvas.height, 5, 0, 2 * Math.PI);
     ctx.fill();
   }
 }

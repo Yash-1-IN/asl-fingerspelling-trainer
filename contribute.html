@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0e1114">
+  <title>Contribute - ASL Fingerspelling Trainer</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preload" href="fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header id="topbar" class="topbar"></header>
+
+  <main id="main" class="page">
+    <div class="page-head">
+      <h1>Help train the recogniser</h1>
+      <p id="status" role="status">Read the short note on the right, then start.</p>
+    </div>
+
+    <div class="two-col">
+      <section aria-label="Camera">
+        <div class="camera-wrap">
+          <video id="camera-feed" autoplay playsinline muted></video>
+          <canvas id="landmarks-overlay"></canvas>
+          <div id="overlay-message" class="overlay-message" aria-hidden="true"></div>
+        </div>
+        <p id="hand-status" class="now-line">Hand: camera is off</p>
+      </section>
+
+      <section class="panel" aria-label="Contribute">
+        <div id="intro">
+          <h2>How this works</h2>
+          <p>You sign each letter for about ten seconds while the camera watches. Then you get a small file to send to the person who built this.</p>
+          <h3>What is in the file</h3>
+          <ul class="checklist">
+            <li>For every captured frame, 63 numbers that describe the shape of your hand.</li>
+            <li>The letter you were signing, a random session code, a timestamp, and which hand it was.</li>
+            <li>No video, no photos, no name.</li>
+          </ul>
+          <p><strong>Nothing is uploaded.</strong> The file stays on your device until you choose to send it yourself.</p>
+          <h3>Before you start</h3>
+          <ul class="checklist">
+            <li>Only record letters you know well. If you are unsure of one, skip it. A wrong shape makes the recogniser worse for everyone.</li>
+            <li>A plain background and decent light help. Either hand is fine.</li>
+            <li>If you are under 18, ask a parent or teacher first.</li>
+          </ul>
+          <div class="button-row">
+            <button id="begin-btn" class="primary" type="button">Turn on camera and start</button>
+          </div>
+        </div>
+
+        <div id="guide" hidden>
+          <p id="step-count" class="mono hint">Letter 1 of 25</p>
+          <progress id="steps" max="25" value="0" aria-label="Letters done"></progress>
+          <p id="step-letter" class="step-letter" aria-live="polite" tabindex="-1">A</p>
+          <p id="step-hint" class="hint"></p>
+          <div class="button-row">
+            <button id="record-btn" class="primary" type="button" disabled>Start recording</button>
+            <button id="cancel-btn" type="button" hidden>Cancel</button>
+            <button id="skip-btn" type="button">Skip this one</button>
+          </div>
+          <progress id="frames" max="100" value="0" aria-label="Frames captured"></progress>
+          <p id="frames-text" class="mono hint">0 / 100 frames</p>
+          <div class="button-row">
+            <button id="finish-btn" type="button" hidden>Finish now</button>
+          </div>
+        </div>
+
+        <div id="done" hidden>
+          <h2 id="done-title" tabindex="-1">Thank you</h2>
+          <p id="done-summary"></p>
+          <p id="send-note"></p>
+          <div id="done-actions" class="button-row">
+            <button id="save-btn" class="primary" type="button">Save my file</button>
+            <a id="mail-link" class="file-button" href="#" hidden>Open an email</a>
+          </div>
+          <div id="done-after">
+            <p class="hint">After saving, send the file to the person who shared this link with you. You can delete your recording from this browser afterwards.</p>
+            <div class="button-row">
+              <button id="delete-btn" type="button">Delete my recording from this browser</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <p>This teaches fingerspelling only. ASL is a full language with its own grammar, and this is one small part of it.</p>
+    <p>Your camera feed stays on your device. Nothing is uploaded, nothing is stored on a server, and there is no account.</p>
+  </footer>
+
+  <script type="module" src="js/nav.js"></script>
+  <script type="module" src="js/ui-contribute.js"></script>
+</body>
+</html>

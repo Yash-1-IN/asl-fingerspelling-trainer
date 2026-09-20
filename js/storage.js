@@ -71,8 +71,11 @@ export function deleteSession(sessionId) {
   return deleteWhere((sample) => sample.sessionId === sessionId);
 }
 
-export async function exportJson() {
-  const samples = (await getAllSamples()).map(({ id, ...rest }) => rest);
+// Pass a sessionId to export only that session (used by the Contribute page).
+export async function exportJson(onlySessionId) {
+  const samples = (await getAllSamples())
+    .filter((s) => !onlySessionId || s.sessionId === onlySessionId)
+    .map(({ id, ...rest }) => rest);
   return JSON.stringify({ version: 1, exportedAt: new Date().toISOString(), samples });
 }
 

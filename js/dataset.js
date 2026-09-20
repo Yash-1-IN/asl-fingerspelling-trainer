@@ -1,5 +1,7 @@
 // Cleaning and splitting the recorded dataset (used by the Train screen).
 
+import { NO_SIGN } from './letters.js';
+
 const mean = (values) => values.reduce((a, b) => a + b, 0) / values.length;
 
 // Drops two kinds of bad frames:
@@ -26,6 +28,11 @@ export function cleanSamples(samples, outlierStdDevs = 3) {
 
   const kept = [];
   for (const group of byLetter.values()) {
+    // "No sign" is meant to be wildly varied, so outlier removal would delete the point of it.
+    if (group[0].letter === NO_SIGN) {
+      kept.push(...group);
+      continue;
+    }
     const centroid = new Array(63).fill(0);
     for (const s of group) {
       for (let i = 0; i < 63; i++) centroid[i] += s.features[i] / group.length;

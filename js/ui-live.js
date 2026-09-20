@@ -2,7 +2,7 @@
 
 import { startCamera } from './camera.js';
 import { startTracking } from './landmarks.js';
-import { LETTERS } from './letters.js';
+import { CLASSES, NO_SIGN, labelOf } from './letters.js';
 import { loadModel, predict } from './model.js';
 import { createSmoother } from './smoothing.js';
 
@@ -25,9 +25,21 @@ function topTwo(probs) {
   return [order[0], order[1]];
 }
 
+const cameraWrap = $('camera-wrap');
+const readout = $('readout');
+const heldIcon = $('held-icon');
+
+// state: 'idle' (no hand), 'searching' (hand, nothing held yet), 'held' (a letter is held)
+function setHeldState(state, letter, text) {
+  cameraWrap.dataset.state = state;
+  readout.dataset.state = state;
+  heldBig.textContent = letter;
+  heldText.textContent = text;
+  heldIcon.hidden = state !== 'held';
+}
+
 function showNoHand() {
-  heldBig.textContent = '–';
-  heldText.textContent = 'Held: none (no hand in view)';
+  setHeldState('idle', '', 'Held: none (no hand in view)');
   nowText.textContent = 'Right now: no hand in view';
   meter.value = 0;
   meterText.textContent = '0%';
@@ -50,17 +62,17 @@ function onFrame(frame) {
 
   if (probs[first] < smoother.settings.minConfidence && probs[second] >= 0.2) {
     nowText.textContent =
-      `Right now: not sure. ${LETTERS[first]} (${pct(probs[first])}) or ${LETTERS[second]} (${pct(probs[second])})`;
+      `Right now: not sure. ${labelOf(CLASSES[first])} (${pct(probs[first])}) or ${labelOf(CLASSES[second])} (${pct(probs[second])})`;
   } else {
-    nowText.textContent = `Right now: ${LETTERS[first]} (${pct(probs[first])})`;
+    nowText.textContent = `Right now: ${labelOf(CLASSES[first])} (${pct(probs[first])})`;
   }
 
-  if (result.held) {
-    heldBig.textContent = LETTERS[result.index];
-    heldText.textContent = `Held: ${LETTERS[result.index]} ✓`;
+  if (result.held && CLASSES[result.index] === NO_SIGN) {
+    setHeldState('searching', '', 'Held: no sign (not a letter)');
+  } else if (result.held) {
+    setHeldState('held', CLASSES[result.index], `Held: ${CLASSES[result.index]}`);
   } else {
-    heldBig.textContent = '–';
-    heldText.textContent = 'Held: none yet';
+    setHeldState('searching', '', 'Held: none yet');
   }
 }
 

@@ -2,18 +2,12 @@
 
 import { startCamera } from './camera.js';
 import { startTracking } from './landmarks.js';
-import { LETTERS } from './letters.js';
+import { CLASSES, NO_SIGN, labelOf } from './letters.js';
+import { TARGET_SAMPLES, newSessionId, createRecorder } from './capture.js';
 import * as storage from './storage.js';
 
-// Easy-to-tune recording settings.
-const TARGET_SAMPLES = 100;        // frames to capture per recording
-const CAPTURE_INTERVAL_MS = 100;   // one frame every 0.1 s, so ~10 s in total
-const MAX_CAPTURE_MS = 20000;      // give up if the hand keeps disappearing
-const COUNTDOWN_SECONDS = 3;
-const LOW_SAMPLE_THRESHOLD = 150;  // letters below this get a "low" marker
-
-// One id per page load. Phase 6 uses it to hold out whole sessions.
-const SESSION_ID = `${new Date().toISOString().slice(0, 10)}-${Math.random().toString(36).slice(2, 8)}`;
+const LOW_SAMPLE_THRESHOLD = 150; // letters below this get a "low" marker
+const SESSION_ID = newSessionId();
 
 const $ = (id) => document.getElementById(id);
 const video = $('camera-feed');
@@ -30,24 +24,37 @@ const deleteLetterBtn = $('delete-letter-btn');
 const totalEl = $('total-count');
 const sessionListEl = $('session-list');
 
-let state = 'idle'; // idle | countdown | capturing
 let trackerReady = false;
 let selectedLetter = null;
 let counts = {};
-let captured = [];
-let captureStartedAt = 0;
-let lastCaptureAt = 0;
-let countdownTimer = null;
 let handVisible = null;
 
 progressEl.max = TARGET_SAMPLES;
+
+const recorder = createRecorder({
+  sessionId: SESSION_ID,
+  onCountdown(remaining) {
+    overlay.textContent = String(remaining);
+    setStatus(`Get ready: ${labelOf(selectedLetter)}. Recording starts in ${remaining}.`);
+  },
+  onCaptureStart() {
+    overlay.textContent = 'Recording';
+    setStatus(
+      selectedLetter === NO_SIGN
+        ? 'Recording “no sign”. Keep your hand in view and keep changing it. Do not sign a letter.'
+        : `Recording ${selectedLetter}. Hold the shape and slowly vary angle and distance.`
+    );
+  },
+  onProgress: showProgress,
+  onFinish: finishRecording,
+});
 
 function setStatus(text) {
   statusEl.textContent = text;
 }
 
 function updateControls() {
-  const busy = state !== 'idle';
+  const busy = recorder.state !== 'idle';
   startBtn.disabled = busy || !trackerReady || !selectedLetter;
   cancelBtn.hidden = !busy;
   deleteLetterBtn.disabled = busy || !selectedLetter || !counts[selectedLetter];
@@ -56,10 +63,10 @@ function updateControls() {
 
 function renderGrid() {
   gridEl.replaceChildren();
-  for (const letter of LETTERS) {
+  for (const letter of CLASSES) {
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'letter-btn';
+    btn.className = letter === NO_SIGN ? 'letter-btn no-sign' : 'letter-btn';
     btn.dataset.letter = letter;
     btn.addEventListener('click', () => selectLetter(letter));
     gridEl.append(btn);
@@ -73,11 +80,11 @@ function paintGrid() {
     const low = count < LOW_SAMPLE_THRESHOLD;
     btn.classList.toggle('low', low);
     btn.setAttribute('aria-pressed', String(letter === selectedLetter));
-    btn.setAttribute('aria-label', `${letter}, ${count} samples${low ? ', needs more' : ''}`);
+    btn.setAttribute('aria-label', `${labelOf(letter)}, ${count} samples${low ? ', needs more' : ''}`);
     btn.replaceChildren();
     const big = document.createElement('span');
     big.className = 'letter';
-    big.textContent = letter;
+    big.textContent = labelOf(letter);
     const small = document.createElement('span');
     small.className = 'count';
     small.textContent = low ? `${count} (low)` : String(count);
@@ -127,53 +134,33 @@ function selectLetter(letter) {
   selectedLetter = letter;
   paintGrid();
   updateControls();
-  setStatus(`Selected ${letter}. Press "Start recording" when your hand is ready.`);
+  $('record-hint').textContent = letter === NO_SIGN
+    ? 'No sign: keep a hand in view but do NOT sign a letter. Relax it, wave, wiggle your fingers, turn it around, move between letters, make half-formed shapes. Keep changing, and record several times.'
+    : 'Hold the handshape, then slowly turn your hand, and move it closer and farther. Variety makes a better model.';
+  setStatus(`Selected ${labelOf(letter)}. Press “Start recording” when your hand is ready.`);
 }
 
-function showProgress() {
-  progressEl.value = captured.length;
-  progressTextEl.textContent = `${captured.length} / ${TARGET_SAMPLES} frames`;
+function showProgress(count = 0) {
+  progressEl.value = count;
+  progressTextEl.textContent = `${count} / ${TARGET_SAMPLES} frames`;
 }
 
 function startRecording() {
-  state = 'countdown';
-  captured = [];
-  showProgress();
+  showProgress(0);
+  recorder.start(selectedLetter);
   updateControls();
-
-  let remaining = COUNTDOWN_SECONDS;
-  setStatus(`Get ready to sign ${selectedLetter}. Recording starts in ${remaining}.`);
-  overlay.textContent = String(remaining);
-  countdownTimer = setInterval(() => {
-    remaining--;
-    if (remaining > 0) {
-      overlay.textContent = String(remaining);
-      return;
-    }
-    clearInterval(countdownTimer);
-    overlay.textContent = 'Recording';
-    state = 'capturing';
-    captureStartedAt = performance.now();
-    lastCaptureAt = 0;
-    setStatus(`Recording ${selectedLetter}. Hold the shape and slowly vary angle and distance.`);
-  }, 1000);
 }
 
 function cancelRecording() {
-  clearInterval(countdownTimer);
-  state = 'idle';
-  captured = [];
+  recorder.cancel();
   overlay.textContent = '';
-  showProgress();
+  showProgress(0);
   setStatus('Recording cancelled. Nothing was saved.');
   updateControls();
 }
 
-async function finishRecording() {
-  state = 'idle';
+async function finishRecording(frames, letter) {
   overlay.textContent = '';
-  const letter = selectedLetter;
-  const frames = captured;
   updateControls();
 
   if (frames.length === 0) {
@@ -184,7 +171,7 @@ async function finishRecording() {
   await refresh();
   const short = frames.length < TARGET_SAMPLES * 0.5;
   setStatus(
-    `Saved ${frames.length} samples for ${letter}.` +
+    `Saved ${frames.length} samples for ${labelOf(letter)}.` +
     (short ? ' That is fewer than expected because the hand kept dropping out. Consider re-recording.' : '')
   );
 }
@@ -193,27 +180,9 @@ function onFrame(frame) {
   const visible = frame !== null;
   if (visible !== handVisible) {
     handVisible = visible;
-    handStatusEl.textContent = visible ? '✓ Hand detected' : '✗ No hand in view';
+    handStatusEl.textContent = visible ? 'Hand: detected' : 'Hand: not in view';
   }
-
-  if (state !== 'capturing') return;
-
-  const now = performance.now();
-  if (frame && now - lastCaptureAt >= CAPTURE_INTERVAL_MS) {
-    lastCaptureAt = now;
-    captured.push({
-      letter: selectedLetter,
-      features: frame.features,
-      sessionId: SESSION_ID,
-      timestamp: Date.now(),
-      handedness: frame.handedness,
-    });
-    showProgress();
-  }
-
-  if (captured.length >= TARGET_SAMPLES || now - captureStartedAt > MAX_CAPTURE_MS) {
-    finishRecording();
-  }
+  recorder.handleFrame(frame);
 }
 
 function downloadText(filename, text) {
@@ -230,9 +199,9 @@ cancelBtn.addEventListener('click', cancelRecording);
 
 deleteLetterBtn.addEventListener('click', async () => {
   const n = counts[selectedLetter] || 0;
-  if (!confirm(`Delete all ${n} samples for ${selectedLetter}? This cannot be undone.`)) return;
+  if (!confirm(`Delete all ${n} samples for ${labelOf(selectedLetter)}? This cannot be undone.`)) return;
   await storage.deleteLetter(selectedLetter);
-  setStatus(`Deleted samples for ${selectedLetter}.`);
+  setStatus(`Deleted samples for ${labelOf(selectedLetter)}.`);
   await refresh();
 });
 
@@ -251,7 +220,7 @@ $('import-input').addEventListener('change', async (event) => {
     setStatus(`Imported ${added} samples (${skipped} skipped as duplicates or invalid).`);
     await refresh();
   } catch (error) {
-    setStatus(`Import failed: ${error.message}`);
+    setStatus(`Import failed: ${error.message} Choose a JSON file exported from this app.`);
   }
 });
 

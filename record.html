@@ -3,54 +3,64 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Record samples – ASL Fingerspelling Trainer</title>
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0e1114">
+  <title>Record samples - ASL Fingerspelling Trainer</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preload" href="fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="css/styles.css">
 </head>
-<body class="record-page">
-  <header class="page-header">
-    <h1>Record samples</h1>
-    <a href="index.html">Back to camera</a>
-    <a href="train.html">Train model</a>
-  </header>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header id="topbar" class="topbar"></header>
 
-  <main class="record-layout">
-    <section aria-label="Camera">
-      <div class="camera-wrap">
-        <video id="camera-feed" autoplay playsinline muted></video>
-        <canvas id="landmarks-overlay"></canvas>
-        <div id="overlay-message" class="overlay-message" aria-hidden="true"></div>
-      </div>
+  <main id="main" class="page">
+    <div class="page-head">
+      <h1>Record samples</h1>
       <p id="status" role="status">Starting camera&hellip;</p>
-      <p id="hand-status">Hand: not checked yet</p>
-      <progress id="progress" max="100" value="0" aria-label="Frames captured"></progress>
-      <p id="progress-text">0 / 100 frames</p>
-    </section>
+    </div>
 
-    <section aria-label="Recording controls">
-      <h2>1. Pick a letter</h2>
-      <div id="letter-grid" class="letter-grid" role="group" aria-label="Letters"></div>
+    <div class="two-col">
+      <section aria-label="Camera">
+        <div class="camera-wrap">
+          <video id="camera-feed" autoplay playsinline muted></video>
+          <canvas id="landmarks-overlay"></canvas>
+          <div id="overlay-message" class="overlay-message" aria-hidden="true"></div>
+        </div>
+        <p id="hand-status" class="now-line">Hand: not checked yet</p>
+        <progress id="progress" max="100" value="0" aria-label="Frames captured"></progress>
+        <p id="progress-text" class="mono">0 / 100 frames</p>
+      </section>
 
-      <h2>2. Record</h2>
-      <p class="hint">Hold the handshape, then slowly turn your hand, and move it closer and farther. Variety makes a better model.</p>
-      <p>
-        <button id="start-btn" type="button" disabled>Start recording</button>
-        <button id="cancel-btn" type="button" hidden>Cancel</button>
-      </p>
+      <section class="panel" aria-label="Recording controls">
+        <h2>1. Pick a letter</h2>
+        <div id="letter-grid" class="letter-grid" role="group" aria-label="Letters"></div>
 
-      <h2>Your data</h2>
-      <p>Total samples: <strong id="total-count">0</strong></p>
-      <p class="hint">Samples live in this browser only. Export a backup after every session.</p>
-      <p>
-        <button id="export-btn" type="button">Export all as JSON</button>
-        <label class="file-button">Import JSON<input id="import-input" type="file" accept="application/json,.json"></label>
-      </p>
-      <p><button id="delete-letter-btn" type="button" disabled>Delete samples for selected letter</button></p>
+        <h2>2. Record</h2>
+        <p id="record-hint" class="hint">Hold the handshape, then slowly turn your hand, and move it closer and farther. Variety makes a better model.</p>
+        <div class="button-row">
+          <button id="start-btn" class="primary" type="button" disabled>Start recording</button>
+          <button id="cancel-btn" type="button" hidden>Cancel</button>
+        </div>
 
-      <h3>Sessions</h3>
-      <ul id="session-list" class="session-list"></ul>
-    </section>
+        <h2>Your data</h2>
+        <p>Total samples: <strong id="total-count" class="mono">0</strong></p>
+        <p class="hint">Samples live in this browser only. Export a backup after every session.</p>
+        <div class="button-row">
+          <button id="export-btn" type="button">Export all as JSON</button>
+          <label class="file-button">Import JSON<input id="import-input" type="file" accept="application/json,.json"></label>
+        </div>
+        <div class="button-row">
+          <button id="delete-letter-btn" type="button" disabled>Delete samples for selected letter</button>
+        </div>
+
+        <h3>Sessions</h3>
+        <ul id="session-list" class="session-list"></ul>
+      </section>
+    </div>
   </main>
 
+  <script type="module" src="js/nav.js"></script>
   <script type="module" src="js/ui-record.js"></script>
 </body>
 </html>

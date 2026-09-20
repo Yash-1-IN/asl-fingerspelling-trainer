@@ -1,7 +1,7 @@
 // Build, train, evaluate, save, load and use the letter-recognition network.
 // TensorFlow.js is loaded by a <script> tag in the page and appears as `tf`.
 
-import { LETTERS } from './letters.js';
+import { CLASSES } from './letters.js';
 
 const MODEL_DB_URL = 'indexeddb://asl-fingerspelling-model';
 const SHIPPED_MODEL_URL = 'model/model.json';
@@ -11,7 +11,7 @@ export function buildModel() {
   model.add(tf.layers.dense({ inputShape: [63], units: 64, activation: 'relu' }));
   model.add(tf.layers.dropout({ rate: 0.2 }));
   model.add(tf.layers.dense({ units: 32, activation: 'relu' }));
-  model.add(tf.layers.dense({ units: LETTERS.length, activation: 'softmax' }));
+  model.add(tf.layers.dense({ units: CLASSES.length, activation: 'softmax' }));
   model.compile({
     optimizer: 'adam',
     loss: 'categoricalCrossentropy',
@@ -22,8 +22,8 @@ export function buildModel() {
 
 function toTensors(samples) {
   const xs = tf.tensor2d(samples.map((s) => s.features));
-  const labels = tf.tensor1d(samples.map((s) => LETTERS.indexOf(s.letter)), 'int32');
-  const ys = tf.oneHot(labels, LETTERS.length).toFloat();
+  const labels = tf.tensor1d(samples.map((s) => CLASSES.indexOf(s.letter)), 'int32');
+  const ys = tf.oneHot(labels, CLASSES.length).toFloat();
   labels.dispose();
   return [xs, ys];
 }
@@ -54,18 +54,18 @@ export async function trainModel(model, trainSamples, valSamples, { epochs = 80,
   }
 }
 
-// Probabilities (one per letter, in LETTERS order) for one 63-number feature vector.
+// Probabilities (one per class, in CLASSES order) for one 63-number feature vector.
 export function predict(model, features) {
   return tf.tidy(() => Array.from(model.predict(tf.tensor2d([features])).dataSync()));
 }
 
 // matrix[trueIndex][predictedIndex] = how many samples.
 export function confusionMatrix(model, samples) {
-  const size = LETTERS.length;
+  const size = CLASSES.length;
   const matrix = Array.from({ length: size }, () => new Array(size).fill(0));
   const predicted = tf.tidy(() => Array.from(model.predict(tf.tensor2d(samples.map((s) => s.features))).argMax(1).dataSync()));
   samples.forEach((s, i) => {
-    matrix[LETTERS.indexOf(s.letter)][predicted[i]]++;
+    matrix[CLASSES.indexOf(s.letter)][predicted[i]]++;
   });
   return matrix;
 }

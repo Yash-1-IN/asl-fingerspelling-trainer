@@ -1,6 +1,6 @@
 // The Train screen: clean the data, pick test sessions, train, show honest results.
 
-import { LETTERS } from './letters.js';
+import { LETTERS, CLASSES, NO_SIGN, labelOf } from './letters.js';
 import * as storage from './storage.js';
 import { cleanSamples, summarizeSessions, chooseValidationSessions } from './dataset.js';
 import { buildModel, trainModel, confusionMatrix, saveToBrowser, exportModelFiles } from './model.js';
@@ -52,11 +52,11 @@ function renderSummary(report) {
   const list = $('letter-counts');
   list.replaceChildren();
   const low = [];
-  for (const letter of LETTERS) {
-    const n = counts[letter] || 0;
+  for (const cls of CLASSES) {
+    const n = counts[cls] || 0;
     const li = document.createElement('li');
-    li.textContent = `${letter}: ${n}${n < LOW_SAMPLE_THRESHOLD ? ' (low)' : ''}`;
-    if (n < LOW_SAMPLE_THRESHOLD) low.push(letter);
+    li.textContent = `${labelOf(cls)}: ${n}${n < LOW_SAMPLE_THRESHOLD ? ' (low)' : ''}`;
+    if (n < LOW_SAMPLE_THRESHOLD) low.push(labelOf(cls));
     list.append(li);
   }
   $('dataset-warning').textContent = low.length
@@ -91,10 +91,11 @@ function renderMatrix(matrix) {
 
   const head = table.insertRow();
   head.insertCell().textContent = '';
-  for (const letter of LETTERS) {
+  for (const cls of CLASSES) {
     const th = document.createElement('th');
     th.scope = 'col';
-    th.textContent = letter;
+    th.textContent = cls === NO_SIGN ? 'none' : cls;
+    th.title = labelOf(cls);
     head.append(th);
   }
 
@@ -103,15 +104,16 @@ function renderMatrix(matrix) {
     const tr = table.insertRow();
     const th = document.createElement('th');
     th.scope = 'row';
-    th.textContent = LETTERS[i];
+    th.textContent = CLASSES[i] === NO_SIGN ? 'none' : CLASSES[i];
+    th.title = labelOf(CLASSES[i]);
     tr.append(th);
     row.forEach((n, j) => {
       const td = tr.insertCell();
       td.textContent = n === 0 ? '·' : String(n);
-      td.title = `Signed ${LETTERS[i]}, guessed ${LETTERS[j]}: ${n}`;
+      td.title = `Really ${labelOf(CLASSES[i])}, guessed ${labelOf(CLASSES[j])}: ${n}`;
       const share = total ? n / total : 0;
-      td.style.background = `rgba(250, 204, 21, ${share.toFixed(2)})`;
-      td.style.color = share > 0.5 ? '#111' : '#eee';
+      td.style.background = `rgba(124, 196, 255, ${share.toFixed(2)})`;
+      td.style.color = share > 0.5 ? '#0e1114' : '#e8ecef';
       if (i === j) td.classList.add('diagonal');
     });
   });
@@ -131,7 +133,7 @@ function renderMatrix(matrix) {
   }
   for (const m of mistakes.slice(0, 8)) {
     const li = document.createElement('li');
-    li.textContent = `${LETTERS[m.i]} mistaken for ${LETTERS[m.j]}: ${m.n} times (${pct(m.share)} of ${LETTERS[m.i]})`;
+    li.textContent = `${labelOf(CLASSES[m.i])} mistaken for ${labelOf(CLASSES[m.j])}: ${m.n} times (${pct(m.share)} of ${labelOf(CLASSES[m.i])})`;
     list.append(li);
   }
 }
@@ -146,8 +148,9 @@ async function run(useTestSplit) {
     return;
   }
   const trainLetters = new Set(trainSamples.map((s) => s.letter));
-  if (LETTERS.some((l) => !trainLetters.has(l))) {
-    setStatus('The training sessions are missing some letters. Untick a test session.');
+  const classesInData = new Set(samples.map((s) => s.letter));
+  if (CLASSES.some((c) => classesInData.has(c) && !trainLetters.has(c))) {
+    setStatus('The training sessions are missing a letter or “No sign”. Untick a test session.');
     return;
   }
 
@@ -176,7 +179,7 @@ async function run(useTestSplit) {
     renderMatrix(matrix);
   } else {
     resultText.textContent =
-      `Final model trained on all ${samples.length.toLocaleString()} samples. It has no test score of its own; quote the one from "Train and test".`;
+      `Final model trained on all ${samples.length.toLocaleString()} samples. It has no test score of its own; quote the one from “Train and test”.`;
   }
 
   training = false;
@@ -207,7 +210,7 @@ async function init() {
   samples = kept;
   renderSummary(report);
   renderSessionChoices();
-  setStatus('Ready. Check the test sessions, then press "Train and test".');
+  setStatus('Ready. Check the test sessions, then press “Train and test”.');
   updateControls();
 }
 
